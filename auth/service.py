@@ -216,7 +216,7 @@ async def user_activation(session: AsyncSession, user, code: str):
     else:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Activation code invalid")
 
-    return JSONResponse(status_code=status.HTTP_200_OK)
+    return JSONResponse(status_code=status.HTTP_200_OK, content="success")
 
 
 def generating_temporary_password():
