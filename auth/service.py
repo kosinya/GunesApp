@@ -182,7 +182,7 @@ async def create_confirmation_code(session: AsyncSession, email: str):
     new_code = model.Activation(
         user_email=email,
         code=code,
-        expiration_date=(datetime.now() + timedelta(minutes=10)).timestamp()
+        expiration_date=str((datetime.now() + timedelta(minutes=10)).timestamp())
     )
 
     session.add(new_code)
@@ -251,8 +251,8 @@ async def create_reset_password_code(session: AsyncSession, email: str):
     new_code = model.Reset(
         user_email=email,
         code=code,
-        date_of_creation=datetime.now().timestamp(),
-        expiration_date=(datetime.now() + timedelta(minutes=10)).timestamp()
+        date_of_creation=str(datetime.now().timestamp()),
+        expiration_date=str((datetime.now() + timedelta(minutes=10)).timestamp())
     )
 
     session.add(new_code)

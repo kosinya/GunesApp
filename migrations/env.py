@@ -5,6 +5,7 @@ from sqlalchemy import pool
 
 from alembic import context
 
+import config as my_config
 from database import Base
 from auth.model import User, Reset, Activation
 
@@ -16,6 +17,8 @@ config = context.config
 # This line sets up loggers basically.
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
+
+config.set_main_option('sqlalchemy.url', my_config.DATABASE_SQLALCHEMY_URL)
 
 # add your model's MetaData object here
 # for 'autogenerate' support

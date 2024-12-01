@@ -2,17 +2,20 @@ from fastapi_mail import FastMail, MessageSchema, ConnectionConfig, MessageType
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.responses import JSONResponse
 from fastapi import status
-from mail.schema import EmailSchema
+from dotenv import load_dotenv
+import os
 
 from auth import service
 
+load_dotenv()
+
 
 config = ConnectionConfig(
-    MAIL_USERNAME="ko.sinya@yandex.ru",
-    MAIL_PASSWORD="crqjiqprgkrztxgn",
-    MAIL_FROM="ko.sinya@yandex.ru",
-    MAIL_PORT=465,
-    MAIL_SERVER="smtp.yandex.ru",
+    MAIL_USERNAME=os.getenv("MAIL_USERNAME"),
+    MAIL_PASSWORD=os.getenv("MAIL_PASSWORD"),
+    MAIL_FROM=os.getenv("MAIL_FROM"),
+    MAIL_PORT=int(os.getenv("MAIL_PORT")),
+    MAIL_SERVER=os.getenv("MAIL_SERVER"),
     MAIL_STARTTLS=False,
     MAIL_SSL_TLS=True,
     USE_CREDENTIALS=True,
@@ -25,7 +28,7 @@ fm = FastMail(config)
 async def send_email_message(email: str, template: str):
 
     message = MessageSchema(
-        subject="Mail service",
+        subject="GunesApp Mail service",
         recipients=[email],
         body=template,
         subtype=MessageType.html
@@ -64,7 +67,6 @@ async def send_reset_password_code(session: AsyncSession, email: str):
                     <p>Приветствуем, дорогой пользователь!</p>
                     <p>Код для сброса пароля: {code}</p>
                     <p>Никому не сообщайте его!</p>
-                    <p>P.S. Альбек, саламыч!</p>
                 </body>
             </html>
     """
