@@ -8,6 +8,7 @@ from alembic import context
 import config as my_config
 from database import Base
 from auth.model import User, Reset, Activation
+from media.model import Image, Audio, Video
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
