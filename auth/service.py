@@ -57,6 +57,10 @@ def verify_password(plain_password, hashed_password) -> bool:
 
 
 async def create_user(session: AsyncSession, user: schema.CreateUser):
+    if len(user.name) == 0 or len(user.email) == 0 or len(user.password) == 0:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="The fields = ['name', 'email', 'password'] cannot be empty")
+
     hashed_password = get_password_hash(user.password)
 
     new_user = model.User(

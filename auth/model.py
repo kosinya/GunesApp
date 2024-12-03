@@ -1,6 +1,8 @@
+from datetime import datetime
+
 from database import Base
 
-from sqlalchemy import Column, String, Integer, Boolean
+from sqlalchemy import Column, String, Integer, Boolean, DateTime
 
 
 class User(Base):
@@ -9,6 +11,7 @@ class User(Base):
     id = Column(Integer(), primary_key=True, index=True)
     name = Column(String(), nullable=False)
     date_of_birth = Column(String())
+    phone_number = Column(String())
     email = Column(String(), unique=True, nullable=False, index=True)
     password = Column(String(), nullable=False)
     is_admin = Column(Boolean(), default=False, nullable=False)
