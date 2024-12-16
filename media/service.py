@@ -4,13 +4,17 @@ import aiofiles
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import File, UploadFile, HTTPException, status
+from fastapi import File, UploadFile, HTTPException, status, Depends
 
 from media import model
 from config import STATIC_FOLDER
+import auth.service as auth_service
 
-
-async def upload_image(session: AsyncSession, file: UploadFile = File(...)):
+async def upload_image(token: str = Depends(auth_service.oauth2_scheme),
+                       session: AsyncSession = None, file: UploadFile = File(...)):
+    user = await auth_service.check_token(token, session)
+    if not user.is_admin:
+        return HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User must be an administrator.")
     if not file.content_type.startswith('image/'):
         raise HTTPException(status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, detail='File must be an image')
     folder = os.path.join(STATIC_FOLDER, 'image')
@@ -59,7 +63,11 @@ async def delete_image_by_id(session: AsyncSession, image_id: int):
     return {'filename': image.filename, 'path': image.path, 'url': image.url}
 
 
-async def upload_audio(session: AsyncSession, file: UploadFile = File(...)):
+async def upload_audio(token: str = Depends(auth_service.oauth2_scheme),
+                       session: AsyncSession = None, file: UploadFile = File(...)):
+    user = await auth_service.check_token(token, session)
+    if not user.is_admin:
+        return HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User must be an administrator.")
     if not file.content_type.startswith('audio/'):
         raise HTTPException(status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, detail='File must be an audio')
     folder = os.path.join(STATIC_FOLDER, 'audio')
@@ -108,7 +116,11 @@ async def delete_audio_by_id(session: AsyncSession, audio_id: int):
     return {'filename': audio.filename, 'path': audio.path, 'url': audio.url}
 
 
-async def upload_video(session: AsyncSession, file: UploadFile = File(...)):
+async def upload_video(token: str = Depends(auth_service.oauth2_scheme),
+                       session: AsyncSession = None, file: UploadFile = File(...)):
+    user = await auth_service.check_token(token, session)
+    if not user.is_admin:
+        return HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User must be an administrator.")
     if not file.content_type.startswith('video/'):
         raise HTTPException(status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, detail='File must be an video')
     folder = os.path.join(STATIC_FOLDER, 'video')

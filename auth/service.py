@@ -56,6 +56,25 @@ def verify_password(plain_password, hashed_password) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
 
+async def check_token(token: str = Depends(oauth2_scheme), session: AsyncSession = None):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, ACCESS_SECRET, algorithms=[ALGORITHM])
+        user_id = payload.get("id")
+        if user_id is None:
+            raise credentials_exception
+    except InvalidTokenError:
+        raise credentials_exception
+    user = await get_user_by_id(session, user_id)
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"User with id = {user_id} not found")
+    return user
+
+
 async def create_user(session: AsyncSession, user: schema.CreateUser):
     if len(user.name) == 0 or len(user.email) == 0 or len(user.password) == 0:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
@@ -131,21 +150,7 @@ async def refresh_token(r_token: str):
 
 
 async def get_current_user(token: str = Depends(oauth2_scheme), session: AsyncSession = None):
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-    try:
-        payload = jwt.decode(token, ACCESS_SECRET, algorithms=[ALGORITHM])
-        user_id = payload.get("id")
-        if user_id is None:
-            raise credentials_exception
-    except InvalidTokenError:
-        raise credentials_exception
-    user = await get_user_by_id(session, user_id)
-    if user is None:
-        raise credentials_exception
+    user = await check_token(token, session)
     return schema.User(id=user.id,
                        name=user.name,
                        email=user.email,
@@ -209,9 +214,9 @@ async def user_activation(session: AsyncSession, user, code: str):
         if res.expiration_date < str(datetime.now().timestamp()):
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Activation code expired")
 
-        user = await get_user_by_email(session, user.email)
-        user.is_active = True
-        session.add(user)
+        updated_user = await get_user_by_email(session, user.email)
+        updated_user.is_active = True
+        session.add(updated_user)
         try:
             await session.commit()
         except Exception as e:

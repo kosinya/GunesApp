@@ -46,7 +46,7 @@ async def refresh(token: str):
 @router.post('/user_activation', tags=["auth"])
 async def activate(token: str = Depends(oauth2_scheme), session: AsyncSession = Depends(get_async_session),
                    code: str = None):
-    user = await get_current_user(token, session)
+    user = await service.check_token(token, session)
     return await service.user_activation(session, user, code)
 
 
@@ -58,5 +58,5 @@ async def reset_password(session: AsyncSession = Depends(get_async_session), ema
 @router.post('/change_password', tags=['auth'])
 async def change_password(token: str = Depends(oauth2_scheme), session: AsyncSession = Depends(get_async_session),
                           new_password: str = None):
-    user = await get_current_user(token, session)
+    user = await service.check_token(token, session)
     return await service.change_password(session, user.email, new_password)
