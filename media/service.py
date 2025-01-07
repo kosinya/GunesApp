@@ -14,13 +14,16 @@ async def upload_image(token: str = Depends(auth_service.oauth2_scheme),
                        session: AsyncSession = None, file: UploadFile = File(...)):
     user = await auth_service.check_token(token, session)
     if not user.is_admin:
-        return HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User must be an administrator.")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User must be an administrator.")
     if not file.content_type.startswith('image/'):
         raise HTTPException(status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, detail='File must be an image')
     folder = os.path.join(STATIC_FOLDER, 'image')
     os.makedirs(folder, exist_ok=True)
 
     path = os.path.join(folder, file.filename)
+    if os.path.exists(path):
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="File already exists.")
+
     async with aiofiles.open(path, 'wb') as out:
         content = await file.read()
         await out.write(content)
@@ -33,8 +36,6 @@ async def upload_image(token: str = Depends(auth_service.oauth2_scheme),
     session.add(new_image)
     try:
         await session.commit()
-    except IntegrityError:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f"File {new_image.filename} already exists")
     except Exception as e:
         await session.rollback()
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
@@ -47,12 +48,17 @@ async def get_all_images(session: AsyncSession):
     return images.scalars().all()
 
 
-async def delete_image_by_id(session: AsyncSession, image_id: int):
+async def delete_image_by_id(token: str = Depends(auth_service.oauth2_scheme),
+                             session: AsyncSession = None, image_id: int = None):
+    user = await auth_service.check_token(token, session)
+    if not user.is_admin:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User must be an administrator.")
     image = await session.execute(select(model.Image).where(model.Image.id == image_id))
     image = image.scalars().first()
     if not image:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'Image with id = {image_id} not found')
-    os.remove(image.path)
+    if os.path.exists(image.path):
+        os.remove(image.path)
     await session.delete(image)
     try:
         await session.commit()
@@ -74,6 +80,9 @@ async def upload_audio(token: str = Depends(auth_service.oauth2_scheme),
     os.makedirs(folder, exist_ok=True)
 
     path = os.path.join(folder, file.filename)
+    if os.path.exists(path):
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="File already exists.")
+
     async with aiofiles.open(path, 'wb') as out:
         content = await file.read()
         await out.write(content)
@@ -86,8 +95,6 @@ async def upload_audio(token: str = Depends(auth_service.oauth2_scheme),
     session.add(new_audio)
     try:
         await session.commit()
-    except IntegrityError:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f"File {new_audio.filename} already exists")
     except Exception as e:
         await session.rollback()
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
@@ -100,12 +107,17 @@ async def get_all_audios(session: AsyncSession):
     return audios.scalars().all()
 
 
-async def delete_audio_by_id(session: AsyncSession, audio_id: int):
+async def delete_audio_by_id(token: str = Depends(auth_service.oauth2_scheme),
+                             session: AsyncSession = None, audio_id: int = None):
+    user = await auth_service.check_token(token, session)
+    if not user.is_admin:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User must be an administrator.")
     audio = await session.execute(select(model.Audio).where(model.Audio.id == audio_id))
     audio = audio.scalars().first()
     if not audio:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'Audio with id = {audio_id} not found')
-    os.remove(audio.path)
+    if os.path.exists(audio.path):
+        os.remove(audio.path)
     await session.delete(audio)
     try:
         await session.commit()
@@ -120,7 +132,7 @@ async def upload_video(token: str = Depends(auth_service.oauth2_scheme),
                        session: AsyncSession = None, file: UploadFile = File(...)):
     user = await auth_service.check_token(token, session)
     if not user.is_admin:
-        return HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User must be an administrator.")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User must be an administrator.")
     if not file.content_type.startswith('video/'):
         raise HTTPException(status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, detail='File must be an video')
     folder = os.path.join(STATIC_FOLDER, 'video')
@@ -153,12 +165,17 @@ async def get_all_videos(session: AsyncSession):
     return videos.scalars().all()
 
 
-async def delete_video_by_id(session: AsyncSession, video_id: int):
+async def delete_video_by_id(token: str = Depends(auth_service.oauth2_scheme),
+                             session: AsyncSession = None, video_id: int = None):
+    user = await auth_service.check_token(token, session)
+    if not user.is_admin:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User must be an administrator.")
     video = await session.execute(select(model.Video).where(model.Video.id == video_id))
     video = video.scalars().first()
     if not video:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'Video with id = {video_id} not found')
-    os.remove(video.path)
+    if os.path.exists(video.path):
+        os.remove(video.path)
     await session.delete(video)
     try:
         await session.commit()

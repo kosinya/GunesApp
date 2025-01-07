@@ -22,8 +22,9 @@ async def get_images(session: AsyncSession = Depends(get_async_session)):
 
 
 @router.delete('/delete_image', tags=['image'])
-async def delete_image(session: AsyncSession = Depends(get_async_session), image_id: str = None):
-    return await service.delete_image_by_id(session, int(image_id))
+async def delete_image(token: str = Depends(oauth2_scheme),
+                       session: AsyncSession = Depends(get_async_session), image_id: str = None):
+    return await service.delete_image_by_id(token, session, int(image_id))
 
 
 @router.post('/upload_audio', tags=['audio'])
@@ -39,8 +40,9 @@ async def get_audios(session: AsyncSession = Depends(get_async_session)):
 
 
 @router.delete('/delete_audio', tags=['audio'])
-async def delete_audio(session: AsyncSession = Depends(get_async_session), audio_id: str = None):
-    return await service.delete_audio_by_id(session, int(audio_id))
+async def delete_audio(token: str = Depends(oauth2_scheme),
+                       session: AsyncSession = Depends(get_async_session), audio_id: str = None):
+    return await service.delete_audio_by_id(token, session, int(audio_id))
 
 
 @router.post('/upload_video', tags=['video'])
@@ -56,5 +58,6 @@ async def get_videos(session: AsyncSession = Depends(get_async_session)):
 
 
 @router.delete('/delete_video', tags=['video'])
-async def delete_video(session: AsyncSession = Depends(get_async_session), video_id: str = None):
-    return await service.delete_video_by_id(session, int(video_id))
+async def delete_video(token: str = Depends(oauth2_scheme),
+                       session: AsyncSession = Depends(get_async_session), video_id: str = None):
+    return await service.delete_video_by_id(token, session, int(video_id))

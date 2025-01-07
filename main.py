@@ -27,7 +27,7 @@ app.include_router(media_router, prefix="/media")
 
 @app.get('/')
 async def welcome():
-    return {"message": "Welcome to JWTauth"}
+    return {"message": "Welcome to GunesApp!"}
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
