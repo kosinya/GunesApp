@@ -13,8 +13,8 @@ import auth.service as auth_service
 async def upload_image(token: str = Depends(auth_service.oauth2_scheme),
                        session: AsyncSession = None, file: UploadFile = File(...)):
     user = await auth_service.check_token(token, session)
-    if not user.is_admin:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User must be an administrator.")
+    # if not user.is_admin:
+    #     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User must be an administrator.")
     if not file.content_type.startswith('image/'):
         raise HTTPException(status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, detail='File must be an image')
     folder = os.path.join(STATIC_FOLDER, 'image')
@@ -51,8 +51,8 @@ async def get_all_images(session: AsyncSession):
 async def delete_image_by_id(token: str = Depends(auth_service.oauth2_scheme),
                              session: AsyncSession = None, image_id: int = None):
     user = await auth_service.check_token(token, session)
-    if not user.is_admin:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User must be an administrator.")
+    # if not user.is_admin:
+    #     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User must be an administrator.")
     image = await session.execute(select(model.Image).where(model.Image.id == image_id))
     image = image.scalars().first()
     if not image:
@@ -72,8 +72,8 @@ async def delete_image_by_id(token: str = Depends(auth_service.oauth2_scheme),
 async def upload_audio(token: str = Depends(auth_service.oauth2_scheme),
                        session: AsyncSession = None, file: UploadFile = File(...)):
     user = await auth_service.check_token(token, session)
-    if not user.is_admin:
-        return HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User must be an administrator.")
+    # if not user.is_admin:
+    #     return HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User must be an administrator.")
     if not file.content_type.startswith('audio/'):
         raise HTTPException(status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, detail='File must be an audio')
     folder = os.path.join(STATIC_FOLDER, 'audio')
@@ -110,8 +110,8 @@ async def get_all_audios(session: AsyncSession):
 async def delete_audio_by_id(token: str = Depends(auth_service.oauth2_scheme),
                              session: AsyncSession = None, audio_id: int = None):
     user = await auth_service.check_token(token, session)
-    if not user.is_admin:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User must be an administrator.")
+    # if not user.is_admin:
+    #     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User must be an administrator.")
     audio = await session.execute(select(model.Audio).where(model.Audio.id == audio_id))
     audio = audio.scalars().first()
     if not audio:
@@ -131,8 +131,8 @@ async def delete_audio_by_id(token: str = Depends(auth_service.oauth2_scheme),
 async def upload_video(token: str = Depends(auth_service.oauth2_scheme),
                        session: AsyncSession = None, file: UploadFile = File(...)):
     user = await auth_service.check_token(token, session)
-    if not user.is_admin:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User must be an administrator.")
+    # if not user.is_admin:
+    #     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User must be an administrator.")
     if not file.content_type.startswith('video/'):
         raise HTTPException(status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, detail='File must be an video')
     folder = os.path.join(STATIC_FOLDER, 'video')
@@ -168,8 +168,8 @@ async def get_all_videos(session: AsyncSession):
 async def delete_video_by_id(token: str = Depends(auth_service.oauth2_scheme),
                              session: AsyncSession = None, video_id: int = None):
     user = await auth_service.check_token(token, session)
-    if not user.is_admin:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User must be an administrator.")
+    # if not user.is_admin:
+    #     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User must be an administrator.")
     video = await session.execute(select(model.Video).where(model.Video.id == video_id))
     video = video.scalars().first()
     if not video:
